@@ -1,0 +1,86 @@
+---
+title: "On the Geometry of Attention"
+date: "2025-01-21"
+description: "A first-principles look at transformer attention as a routing mechanism over a learned metric space."
+draft: true
+tags: ["demo", "simulations"]
+---
+
+A language model is, at its core, a function that maps a sequence of tokens to a probability distribution over the next token. The machinery that achieves this is surprisingly elegant — and strange, once you look at it long enough.
+
+## The Attention Mechanism
+
+The scaled dot-product attention computes a weighted average of values, where the weights are determined by the compatibility between a query and a set of keys:
+
+$$\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V$$
+
+Here $Q$, $K$, and $V$ are the query, key, and value matrices respectively, and $d_k$ is the dimensionality of the key vectors. The $\sqrt{d_k}$ term prevents the dot products from growing so large that the softmax saturates into near-one-hot distributions.
+
+What this actually does: each token queries all other tokens and asks, *how relevant are you to me?* The answer is a softmax-normalized score. The output is a linear combination of values weighted by those scores.
+
+## Image Patch Tokenization
+
+Before an image can be processed by a transformer, it must be converted into a sequence of tokens — the same primitive the architecture expects. The standard approach, introduced in ViT, is to divide the image into a grid of non-overlapping patches and flatten each patch into a vector.
+
+<ImageChunking />
+
+Each highlighted region above becomes a single token. A 224×224 image divided into 14×14 patches yields 256 tokens — a sequence the attention mechanism can then route over exactly as it would over words.
+
+## Multi-Head Attention
+
+In practice we run $h$ attention heads in parallel, each projecting into a different subspace:
+
+$$\text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\,W^O$$
+
+where $\text{head}_i = \text{Attention}(QW_i^Q,\, KW_i^K,\, VW_i^V)$.
+
+The intuition is that different heads can attend to different *types* of relationships simultaneously — syntactic structure, coreference, semantic role, positional proximity. Whether that intuition holds up empirically is a separate and murkier question.
+
+## A Minimal Implementation
+
+```python
+import torch
+import torch.nn.functional as F
+
+def attention(Q, K, V, mask=None):
+    d_k = Q.size(-1)
+    scores = torch.matmul(Q, K.transpose(-2, -1)) / d_k ** 0.5
+
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, float('-inf'))
+
+    weights = F.softmax(scores, dim=-1)
+    return torch.matmul(weights, V), weights
+```
+
+The mask is essential for autoregressive generation: a token at position $i$ must not be able to attend to positions $j > i$. You implement this as a lower-triangular boolean matrix.
+
+## What Attention Is Actually Doing
+
+Here is the part that doesn't appear in the paper.
+
+Attention is a *soft, differentiable retrieval* operation over a content-addressable memory. The keys and queries define a learned metric in $\mathbb{R}^{d_k}$, and the softmax over dot products is a smooth approximation to nearest-neighbor lookup in that space.
+
+The reason transformers work so well isn't that attention is particularly clever. It's that it's *parallelizable* — every position attends to every other position simultaneously, so the entire operation is a single batched matrix multiply. Recurrent architectures can in principle express the same computations; they just can't compute them in parallel across time.
+
+---
+
+Whether this framing actually illuminates anything, or is just a cleaner way to say "it works," is something I think about more than I probably should.
+
+## Quantization
+
+Each weight in a full-precision model occupies 32 bits. Quantization compresses those weights into fewer bits — trading representational fidelity for speed and footprint.
+
+<QuantizationDecay />
+
+## Routing by Complexity
+
+Not every query needs your largest model. A complexity-aware router sends simple requests to cheap, fast models and reserves expensive capacity for genuinely hard ones.
+
+<ModelRouting />
+
+## Cloud vs Edge Latency
+
+Drag the payload slider up to simulate a multimodal request (screenshot + context) and watch where the time actually goes.
+
+<CloudLatency />

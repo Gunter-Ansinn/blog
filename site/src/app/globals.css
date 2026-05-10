@@ -1,21 +1,442 @@
+@import 'katex/dist/katex.min.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:           #FAF8F5;
+  --bg-subtle:    #F0EBE3;
+  --text:         #1C1917;
+  --text-muted:   #7A7067;
+  --gold:         #B8913A;
+  --border:       #E2DDD6;
+  --code-bg:      #EDEAE4;
+  --font-body:    var(--font-garamond), Georgia, 'Times New Roman', serif;
+  --font-mono:    var(--font-mono-var), 'Courier New', monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg:           #131110;
+    --bg-subtle:    #1C1A17;
+    --text:         #E8E2D8;
+    --text-muted:   #9B9088;
+    --gold:         #C9A84C;
+    --border:       #2C2820;
+    --code-bg:      #1C1A17;
   }
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.75;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+}
+
+/* ── Site shell ───────────────────────────────────────────── */
+
+.site-container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.site-header {
+  padding: 2.5rem 0 0;
+}
+
+.site-header-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.site-wordmark {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-decoration: none;
+}
+
+.site-wordmark:hover {
+  opacity: 0.75;
+}
+
+.site-rule {
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.3;
+  margin-top: 1rem;
+}
+
+.site-main {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 4rem;
+}
+
+.site-footer {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* ── Index page ───────────────────────────────────────────── */
+
+.index-header {
+  margin-bottom: 3rem;
+}
+
+.index-title {
+  font-size: 1.625rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}
+
+.index-subtitle {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin: 0;
+  font-style: italic;
+}
+
+.post-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.post-list-item {
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 0;
+}
+
+.post-list-item:first-child {
+  border-top: 1px solid var(--border);
+}
+
+.post-list-link {
+  text-decoration: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1.5rem;
+}
+
+.post-list-link:hover .post-list-title {
+  color: var(--gold);
+}
+
+.post-list-title {
+  font-size: 1.0625rem;
+  color: var(--text);
+  font-weight: 400;
+  transition: color 0.15s ease;
+}
+
+.post-list-date {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.post-list-desc {
+  margin: 0.25rem 0 0;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+}
+
+.post-tag {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+  padding: 0.1em 0.55em 0.15em;
+  border-radius: 2px;
+}
+
+/* ── Post page ────────────────────────────────────────────── */
+
+.post-header {
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.post-title {
+  font-size: 2.75rem;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.75rem;
+  color: var(--text);
+}
+
+.post-meta {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  margin: 0;
+}
+
+.post-back {
+  display: inline-block;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 2.5rem;
+}
+
+.post-back:hover {
+  color: var(--gold);
+}
+
+/* ── Series nav ───────────────────────────────────────────── */
+
+.series-nav {
+  margin-top: 3.5rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
+  border-left: 2px solid var(--gold);
+}
+
+.series-nav-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 0.75rem;
+}
+
+.series-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.series-nav-item {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
+.series-nav-item a {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.series-nav-item a:hover {
+  color: var(--gold);
+}
+
+.series-nav-item--current {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.series-nav-item--current::before {
+  content: '→ ';
+  color: var(--gold);
+}
+
+/* ── Prose ────────────────────────────────────────────────── */
+
+.prose {
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-weight: 500;
+  line-height: 1.3;
+  margin: 2.25em 0 0.6em;
+  letter-spacing: -0.01em;
+}
+
+.prose h2 { font-size: 1.375rem; color: var(--gold); }
+.prose h3 { font-size: 1.15rem; color: var(--text); }
+.prose h4 { font-size: 1rem; color: var(--text); text-transform: uppercase; letter-spacing: 0.08em; }
+
+.prose p {
+  margin: 0 0 1.25em;
+}
+
+.prose hr {
+  border: none;
+  margin: 2.75em 0;
+  text-align: center;
+}
+
+.prose hr::after {
+  content: '◆';
+  color: var(--gold);
+  opacity: 0.5;
+  font-size: 0.8125rem;
+  letter-spacing: 0.3em;
+}
+
+.prose a {
+  color: var(--text);
+  text-decoration-color: var(--gold);
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.prose a:hover {
+  color: var(--gold);
+}
+
+.prose strong {
+  font-weight: 600;
+}
+
+.prose em {
+  font-style: italic;
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--code-bg);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+}
+
+.prose pre,
+.prose figure[data-rehype-pretty-code-figure] pre {
+  background: var(--code-bg);
+  border-left: 2px solid var(--gold);
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  margin: 1.75em 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.prose figure[data-rehype-pretty-code-figure] {
+  margin: 1.75em 0;
+}
+
+.prose figure[data-rehype-pretty-code-figure] pre {
+  margin: 0;
+}
+
+.prose pre code,
+.prose figure[data-rehype-pretty-code-figure] pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  border-radius: 0;
+  font-family: var(--font-mono);
+  color: inherit;
+}
+
+.prose blockquote {
+  border-left: 2px solid var(--gold);
+  padding: 0.1em 0 0.1em 1.25em;
+  margin: 1.5em 0;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.prose blockquote p {
+  margin: 0;
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5em 0;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.5em;
+  margin: 0 0 1.25em;
+}
+
+.prose li {
+  margin-bottom: 0.3em;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  margin: 1.5em 0;
+}
+
+.prose th {
+  text-align: left;
+  font-weight: 500;
+  border-bottom: 2px solid var(--border);
+  padding: 0.5em 0.75em;
+}
+
+.prose td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.5em 0.75em;
+}
+
+/* Drop cap on first paragraph of a post */
+.prose > p:first-child::first-letter {
+  font-size: 4.25em;
+  line-height: 0.82;
+  float: left;
+  margin-right: 0.07em;
+  margin-top: 0.06em;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+/* KaTeX display math */
+.prose .katex-display {
+  overflow-x: auto;
+  padding: 0.5em 0;
+  margin: 1.5em 0;
 }

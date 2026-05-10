@@ -1,0 +1,40 @@
+---
+title: "On Deployed Intelligence"
+date: "2026-05-09"
+description: "A short writeup on deploying intelligence and the downsides of the current philosophy."
+tags: ["inference", "edge", "llm"]
+series: "deployed-intelligence"
+---
+
+We are at an unprecedented time in human history. The traditional rules of intelligence have been long overturned starting with the AI revolution. But in this revolution we've also forgotten what it means to use intelligence sparingly. Especially so as we rush to automate even the most mundane of tasks. As people throw cutting edge frontier models like Opus or GPT 5.5 at every problem in front of them.
+
+We see this with most every Agentic LLM framework. This same tired model of just throwing Text prediction models at everything. I personally feel LLM's provide a valuable service. They're Generalizable brains which can adjust their very behavior using *just* text and context. 
+
+But that's not to say you can only and need to only use this brain. Especially when it comes to edge computing. 
+
+An unfortunate reality is that with LLM's you're *always* going to be dealing with tradeoffs between Cost, Capability, and Speed. You can have one and you can have two be middling but you can't have all three. 
+
+<DeploymentTrilemma />
+
+And yes, if we take a look at the trajectory of how LLM's are going smaller models are getting smarter no doubt. But we're also not at a point where a model which contains the entire corpus of the internet can run on your local base macbook model with maybe 8 gigs of RAM and then be able to spare more space for actual programs or a video game.
+
+You can quantize those models and make them smaller but you're also going to be subject to even more decay of performance. You've successfully budgeted your memory but at great capability loss. 
+
+The lossy compression propagates through every layer, corrupting the internal representations that give these models their power. 
+
+<QuantizationDecay model="Mistral 7B" cliffAfter="INT4" />
+
+So really, where does that leave us? The real solution is simple. We relearn the old ways of software development where we ration intelligence itself. Instead of massive text models we derive domain specific models. 
+
+We derive more local models which can make use of our newer capabilities of semantic communication. Since, text still stands *as an exceeding useful medium* for communication with other language models and any people using it as a standalone tool.
+
+Most Agentic usage you use and you see is overkill. You're dealing heavily with pattern matching so why waste time, compute, and energy on a VLM model reasoning over all the UI elements it sees on a screen when tasked with parsing out the UI it sees?
+
+Instead why not derive a model with the sole purpose of taking a visual input of a UI and breaking apart its UI elements into a bunch of output bounding boxes with visual tags? You now have something which a language model can now reason over a lot faster in its native language format letting it emit click primitives in text form using these bounding boxes.
+
+A vision classifier that labels UI elements is orders of magnitude faster and cheaper than a frontier model receiving the same screenshot. Let the model communicate through text either via direct semantic communication or a returned structured payload. 
+
+That's what rationing intelligence looks like. This current path that the industry is reaching towards where the solution is just throw a bigger model at the problem and trying to prompt your way to success is ultimately a failure in systems design. For the future of AI, we need to be smarter as well as our models.
+
+---
+
