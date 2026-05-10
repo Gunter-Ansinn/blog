@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false })
 
@@ -207,9 +208,9 @@ export default function AdminPage() {
           Save <kbd style={{ opacity: 0.6, fontSize: '0.75em' }}>⌘S</kbd>
         </button>
 
-        <a href="/" style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', textDecoration: 'none' }}>
+        <Link href="/" style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', textDecoration: 'none' }}>
           ← Site
-        </a>
+        </Link>
       </div>
 
       {/* ── Split pane ───────────────────────────────────────── */}

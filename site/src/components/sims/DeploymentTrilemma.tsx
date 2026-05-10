@@ -12,14 +12,7 @@ const H = 400
 const CX = W / 2
 const R  = 150  // circumradius of triangle
 
-// Vertices: top = Capability, bottom-left = Cost, bottom-right = Speed
-const VERTICES = [
-  { label: 'Capability',  x: CX,          y: 40           },
-  { label: 'Cost',        x: CX - R * Math.sin(Math.PI * 2 / 3), y: 40 + R + R * (1 - Math.cos(Math.PI * 2 / 3)) },
-  { label: 'Speed',       x: CX + R * Math.sin(Math.PI * 2 / 3), y: 40 + R + R * (1 - Math.cos(Math.PI * 2 / 3)) },
-]
-
-// Re-derive using proper equilateral triangle geometry
+// Equilateral triangle geometry
 const TOP   = { x: CX,                  y: 48 }
 const LEFT  = { x: CX - R * 0.866,      y: 48 + R * 1.5 }
 const RIGHT = { x: CX + R * 0.866,      y: 48 + R * 1.5 }
