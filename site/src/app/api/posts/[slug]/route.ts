@@ -1,6 +1,3 @@
-// Admin-only API — excluded from static export (GitHub Pages)
-export const dynamic = 'force-dynamic'
-
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'

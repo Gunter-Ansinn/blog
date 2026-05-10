@@ -31,10 +31,8 @@ jobs:
         working-directory: site
 
       - name: Build
-        run: npm run build
+        run: npm run build:static
         working-directory: site
-        # GITHUB_ACTIONS=true is set automatically — next.config.ts uses it
-        # to enable output: 'export' and disable the admin API routes
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
