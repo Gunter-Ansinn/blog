@@ -11,6 +11,8 @@ import type { Metadata } from 'next'
 import { formatDate } from '@/lib/formatDate'
 import * as sims from '@/components/sims'
 import SeriesNav, { type SeriesPost } from '@/components/SeriesNav'
+import Tweet from '@/components/Tweet'
+import XHandle from '@/components/XHandle'
 
 const POSTS_DIR = path.join(process.cwd(), 'posts')
 
@@ -94,7 +96,7 @@ export default async function Post({ params }: Props) {
       <div className="prose">
         <MDXRemote
           source={content}
-          components={sims}
+          components={{ ...sims, Tweet, XHandle }}
           options={{ mdxOptions }}
         />
       </div>

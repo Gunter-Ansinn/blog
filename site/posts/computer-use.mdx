@@ -1,0 +1,198 @@
+---
+title: "On Computer Use"
+date: "2026-05-10"
+description: "Thoughts on computer use agents."
+---
+
+Like many developers we all find ourselves falling into particularly weird rabbit holes on occasion. Some of us are just looking for our next project, while others just want to dip their toes into something fresh for a bit.
+
+I personally fall into the former.
+
+The project? Computer use. Computer use is one of those things you don't really think about because for many it seems like a cut and dry solved problem. Your codex app? it can perform computer actions on your behalf via its computer-use feature. Claude has similar tools. 
+
+However, it's one of those things you don't quite think about until you realize that it's not solved at all. 
+
+It's February 2nd. Brett Adcock posts the Browser Navigation challenge. I, have been between projects for a while at this point. Currently too burnt out to work on my hand written [Image parser](/Pixelatte) and looking for something to take my mind off the task for a bit.
+
+<Tweet id="2018417226895028414" />
+
+The challenge is deceptively simple. Thirty questions, five minutes to answer, and an indefinite time period to submit results. All for the oh so convincing reward of... company equity and a job after giving away your valuable IP.
+
+There is one rule... specified *very* late into the "game", you can't use anything but vision to solve problems. 
+
+That means no DOM manipulation, no unfair information gleamed from webpage source code, *nothing*.
+
+To make it worse the website is designed to be as hostile as possible to all attempts to parse it like a sane human being. With pop-up spam, moving widgets, the works. Any poor unsuspecting agent would find itself having a very bad time. 
+
+## Cloud
+
+Naturally this brings us to the first and obviously only route many people would consider. You pick a model and stick with it. My personal model of choice was gemini at the time. 
+
+To preface this, I hadn't made *any* computer use agents or frameworks before this *ever*. So like an idiot I decided to try and get to the end shape of one using reasoning and first principles alone. 
+
+So naturally you do what seems natural starting out. You grab the DOM and you plug it into the gemini API with the request "hey could you please get to the end of this website." and bob's your uncle.
+
+```python
+from playwright.sync_api import sync_playwright
+import google.generativeai as genai
+
+def attempt_task(task: str, url: str):
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=False)
+        page = browser.new_page()
+        page.goto(url)
+
+        dom = page.content()  # just... grab the whole thing
+
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        response = model.generate_content(f"""
+            Page HTML:
+            {dom}
+
+            Task: {task}
+
+            Return a CSS selector for the element I should interact with.
+        """)
+
+        page.click(response.text.strip())
+```
+
+Welp, that didn't work quite so well.
+
+That's a lot of input tokens spent per page that's going to stack up. Not to mention it's around this time I learnt, looking through the replies that this was *not* the desired solution.
+
+Brett Adcock specified later that the desired solution they had was visual based so that it could be applied outside of the browser. To which, that does track with the name. 
+
+Point is the current model of things wasn't going to fly, so what did I do? I did the exact same thing, but this time with screenshots. There's better ways to go about this as I'm aware but the plan was to see how much i'd be starting with in terms of computer use capabilities. 
+
+```python
+import base64
+import google.generativeai as genai
+from playwright.sync_api import sync_playwright
+
+def run_agent(task: str, url: str):
+    with sync_playwright() as p:
+        page = p.chromium.launch().new_page()
+        page.goto(url)
+
+        model = genai.GenerativeModel("gemini-2.0-flash")
+
+        while True:
+            screenshot = base64.b64encode(page.screenshot()).decode()
+
+            response = model.generate_content([
+                {"mime_type": "image/png", "data": screenshot},
+                f"Task: {task}\nWhat is the next action? Reply with CLICK x,y · TYPE text · or DONE"
+            ])
+
+            action = response.text.strip()
+            if action == "DONE":
+                break
+            elif action.startswith("CLICK"):
+                x, y = map(int, action[6:].split(","))
+                page.mouse.click(x, y)
+            elif action.startswith("TYPE"):
+                page.keyboard.type(action[5:])
+```
+
+Which is to say, not... very much. 
+
+Starting from the top, I decided to actually look into what the glue is binding together current computer use agents.
+
+Which to my very great surprise... is literally exactly this. 
+
+Of course there's a whole bunch of variations where you pack history in and then begin compressing history into text but point is this is pretty much just the norm.
+
+So then... where did this leave me?
+
+I tried to ponder a multi-agent system but ended up scrapping it for overhead complexity. 
+
+It can work, don't get me wrong but you're also going to end up with a situation where your other agents are going to get bottlenecked just by waiting for one agent to pass through a task like taking down pop-ups. Multiple models to compete with pressing a handful of sequential buttons is just token burn.
+
+So then you reach for the other tool in your programmers toolbox. You try to see if you can queue up actions to occur. Send a request to an API and instead of one action back you get a list of sequential actions to take. 
+
+```python
+action_queue = asyncio.Queue()
+
+async def agent(task: str, screenshot: str):
+    response = model.generate_content([...])
+    await action_queue.put(response.text.strip())
+
+# agents reason concurrently
+await asyncio.gather(
+    agent("dismiss any popups", screenshot),
+    agent(task, screenshot),
+)
+
+# execute one at a time regardless
+while not action_queue.empty():
+    execute(await action_queue.get())
+```
+
+But this leads us to a critical error. You cannot reason about nor plan for what you cannot see. Misclicks and mistakes can be brutal. So that means we need state related to what's at hand. 
+
+Fine, I can deal with this. Then it struck me I'm also paying an invisible tax. A very great one which I have wrestled with for a long time. Stripping precious seconds from us every API call.
+
+*Latency*
+
+<LatencyBreakdown
+  title="Computer Use — Per Action Cost"
+  uploadMs={480}
+  queueMs={50}
+  execMs={900}
+  downloadMs={6}
+/>
+
+The arch nemesis of the developer. The great de-equalizer which explodes the difficulty of human interaction with any form of web app immensely. I needed something where it wouldn't exist. I needed the solution to be...
+
+## Local
+
+Within the realm of local computation you trade latency for optimization on the target hardware which is its own headache. So, me being the intelligent person that I am simply... swapped to a local Gemma model with 7 billion parameters and called it good. 
+
+For the computer I was using for the task at the time let's just say I would have been way better off trying to complete the website on my phone. 
+
+Coming in at roughly 50 tok/s on a mid-range GPU, and with each screenshot adding 1–3 seconds of prefill before a single token is emitted, you're already over budget on the first action.
+
+But, as you can no doubt see by the scrollbar on this article there's still a ways to go. So this clearly was neither the final nor the optimally satisfying solution. 
+
+Firstly, on memory.
+
+<ModelVRAM />
+
+As the graphic shows even for just a 3B parameter model aiming for no decay in performance you're giving up 6 GB's of RAM for absolutely middling performance on your computer. 
+
+On a standard 8 GB macbook running a full precision 3B model with MLX you get a whopping 0.9 GB of RAM left to do whatever you need applications wise. Check it out on the attached SIM.
+
+<EffectiveRAM />
+
+I don't know about you but personally I find chromium derived web browsers to be a bit RAM heavy. And the economics don't scale much better for having even more applications open.
+
+So this leaves us in a bit of a bind for the problem space. We're sacrificing a lot of memory for what can be summed up as a dumber model which we're hoping can generate tokens fast enough that are accurate enough to be dubbed "computer use".
+
+Then what is the obvious solution here? do we just twiddle our thumbs until we're so good at model quantization we can pack today's 70B SOTA models on a Q4 quantized 3B parameter model?
+
+No.
+
+We heavily constrain the problem space and take a page out of my first article [Deployed Intelligence](/on-deployed-intelligence). 
+
+## Conclusion
+
+I know this is supposed to be the part of the article in which I go:
+
+"Against all odds I found out the truly optimal way and emerged victorious." 
+
+Then Primeagen reads this article on stream, makes a clickbait thumbnail and posts the video to youtube and everyone celebrates.
+
+To which I must give the unsatisfying answer of no, I haven't and it's not even close. This is an active branch of ML research. So many talented individuals right now, even as I write this article, are working on chipping away at the exact same problem. 
+
+The very talented people at <XHandle handle="moondreamai" /> are currently trying to get their photon engine working as showcased by one of their engineers here:
+
+<Tweet id="2050372962952601996" />
+
+Now this isn't all to say I don't have any answers to these problems. I just cannot guarantee that they're *the* answers or that they're *the* ultimate path to widely deployed Computer use models. But I do see a way forward. This article is getting a bit long but trust me there's way more to say on this and to talk about my current in-development stack I've been working on. 
+
+But before I end this first article I'd like to leave you with this foundational thesis. 
+
+Computer use and its future is inherently a computer native concept. It is not a service it is not a bunch of API calls it is *none* of those things. It is local, it is fast, and it is completely private.
+
+---

@@ -17,6 +17,7 @@
     "next-mdx-remote": "^6.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-tweet": "^3.3.0",
     "rehype-katex": "^7.0.1",
     "rehype-pretty-code": "^0.14.3",
     "rehype-raw": "^7.0.0",

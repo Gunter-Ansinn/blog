@@ -3,11 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 
 interface Props {
-  title?:         string
-  cloudExecMs?:   number   // cloud model inference time (ms)
-  edgeExecMs?:    number   // local/edge model inference time (ms)
-  responseKB?:    number   // response payload size
-  cloudQueueMs?:  number   // cold-start / queue wait
+  title?:            string
+  cloudExecMs?:      number   // cloud model inference time (ms)
+  edgeExecMs?:       number   // local/edge model inference time (ms)
+  responseKB?:       number   // response payload size
+  cloudQueueMs?:     number   // cold-start / queue wait
+  initialPayloadKB?: number   // starting payload slider value
+  initialNetworkMbps?: number // starting network slider value
+  initialEdgeSpeedX?: number  // starting edge compute multiplier
 }
 
 const GOLD    = '#C9A84C'
@@ -44,16 +47,19 @@ function scale(ms: number): number {
 }
 
 export default function CloudLatency({
-  title        = 'Cloud vs Edge Latency',
-  cloudExecMs  = 900,
-  edgeExecMs   = 3200,
-  responseKB   = 4,
-  cloudQueueMs = 45,
+  title              = 'Cloud vs Edge Latency',
+  cloudExecMs        = 900,
+  edgeExecMs         = 3200,
+  responseKB         = 4,
+  cloudQueueMs       = 45,
+  initialPayloadKB   = 120,
+  initialNetworkMbps = 50,
+  initialEdgeSpeedX  = 1.0,
 }: Props) {
   const ref = useRef<HTMLCanvasElement>(null)
-  const [payloadKB,   setPayloadKB]   = useState(120)   // ~1 compressed screenshot
-  const [networkMbps, setNetworkMbps] = useState(50)
-  const [edgeSpeedX,  setEdgeSpeedX]  = useState(1.0)   // multiplier on edge compute
+  const [payloadKB,   setPayloadKB]   = useState(initialPayloadKB)
+  const [networkMbps, setNetworkMbps] = useState(initialNetworkMbps)
+  const [edgeSpeedX,  setEdgeSpeedX]  = useState(initialEdgeSpeedX)
 
   useEffect(() => {
     const canvas = ref.current

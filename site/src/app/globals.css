@@ -228,6 +228,32 @@ body {
   color: var(--gold);
 }
 
+/* ── Tweet embed ──────────────────────────────────────────── */
+
+.tweet-wrapper {
+  margin: 2em auto;
+  max-width: 520px;
+}
+
+/* Override react-tweet CSS variables to match blog theme */
+.tweet-wrapper .react-tweet-theme {
+  --tweet-skeleton-gradient:          linear-gradient(270deg, rgba(201,168,76,0.04), rgba(201,168,76,0.08), rgba(201,168,76,0.04));
+  --tweet-border:                     1px solid rgba(201,168,76,0.2);
+  --tweet-font-family:                var(--font-body);
+  --tweet-font-color:                 #E8E2D8;
+  --tweet-font-color-secondary:       rgba(232,226,216,0.5);
+  --tweet-bg-color:                   #1a1713;
+  --tweet-bg-color-hover:             rgba(201,168,76,0.06);
+  --tweet-quoted-bg-color-hover:      rgba(201,168,76,0.06);
+  --tweet-color-blue-primary:         #C9A84C;
+  --tweet-color-blue-secondary:       rgba(201,168,76,0.6);
+  --tweet-color-blue-secondary-hover: rgba(201,168,76,0.15);
+  --tweet-twitter-icon-color:         rgba(232,226,216,0.35);
+  --tweet-font-size:                  0.9375rem;
+  --tweet-link-color:                 #C9A84C;
+  --tweet-container-margin:           0;
+}
+
 /* ── Series nav ───────────────────────────────────────────── */
 
 .series-nav {
@@ -322,13 +348,16 @@ body {
 
 .prose a {
   color: var(--text);
+  text-decoration: underline;
+  text-decoration-style: dotted;
   text-decoration-color: var(--gold);
-  text-underline-offset: 3px;
+  text-underline-offset: 4px;
   transition: color 0.15s ease;
 }
 
 .prose a:hover {
   color: var(--gold);
+  text-decoration-style: solid;
 }
 
 .prose strong {
@@ -394,8 +423,14 @@ body {
   margin: 2.5em 0;
 }
 
-.prose ul,
+.prose ul {
+  list-style: disc;
+  padding-left: 1.5em;
+  margin: 0 0 1.25em;
+}
+
 .prose ol {
+  list-style: decimal;
   padding-left: 1.5em;
   margin: 0 0 1.25em;
 }
